@@ -1,0 +1,653 @@
+openapi: 3.0.0
+info:
+  title: Inventory Service API
+  version: 1.0.0
+  description: API for managing phone inventory in a store
+
+servers:
+  - url: http://phone-inventory:8080
+
+paths:
+  /inventory/id/{id}:
+    get:
+      summary: Get item by ID
+      operationId: getPhoneById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the phone
+      responses:
+        '200':
+          description: Item retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                type: "iPhone 16"
+                model: "Apple"
+                quantity: 50
+                price: 999.99
+                isAvailable: true
+                dateAdded: "2025-07-23T09:19:44.527Z"
+        '400':
+          description: Invalid ID supplied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Phone not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete item by ID
+      operationId: deletePhoneById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the phone to delete
+      responses:
+        '200':
+          description: Item deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid phone ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Phone not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventory/ids:
+    get:
+      summary: Get multiple items by IDs
+      operationId: getPhonesByIds
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+            minItems: 1
+            maxItems: 50
+          description: Array of phone IDs (maximum 50 items)
+      responses:
+        '200':
+          description: Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  type: "iPhone 16"
+                  model: "Apple"
+                  quantity: 50
+                  price: 999.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T09:19:44.527Z"
+                - id: "4fb85f64-5717-4562-b3fc-2c963f66afa7"
+                  type: "Galaxy S24"
+                  model: "Samsung"
+                  quantity: 30
+                  price: 899.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T10:19:44.527Z"
+        '400':
+          description: Invalid IDs format or too many IDs requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete multiple items by IDs
+      operationId: deletePhonesByIds
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              format: uuid
+            minItems: 1
+            maxItems: 50
+          description: Array of phone IDs to delete (maximum 50 items)
+      responses:
+        '200':
+          description: Items deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeleteResponse'
+        '400':
+          description: Invalid IDs format or too many IDs provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Some or all phones not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventory/model/{model}:
+    get:
+      summary: Get item by model
+      operationId: getPhonesByModel
+      parameters:
+        - name: model
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - Apple
+              - Samsung
+              - OnePlus
+              - Xiaomi
+              - Google
+          description: Phone manufacturer model
+      responses:
+        '200':
+          description: Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  type: "iPhone 16"
+                  model: "Apple"
+                  quantity: 50
+                  price: 999.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T09:19:44.527Z"
+        '400':
+          description: Invalid model name
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventory/models:
+    get:
+      summary: Get multiple items by models
+      operationId: getPhonesByModels
+      parameters:
+        - name: models
+          in: query
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - Apple
+                - Samsung
+                - OnePlus
+                - Xiaomi
+                - Google
+            minItems: 1
+            maxItems: 5
+          description: Array of phone models (maximum 5 models)
+      responses:
+        '200':
+          description: Items retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  type: "iPhone 16"
+                  model: "Apple"
+                  quantity: 50
+                  price: 999.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T09:19:44.527Z"
+        '400':
+          description: Invalid model names or too many models requested
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventory:
+    post:
+      summary: Add one or more phones to inventory
+      operationId: addPhones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PhoneInventoryItemRequest'
+              minItems: 1
+              maxItems: 100
+            example:
+              - type: "iPhone 16"
+                model: "Apple"
+                quantity: 50
+                price: 999.99
+                isAvailable: true
+                storeId: "store-001"
+              - type: "Galaxy S24"
+                model: "Samsung"
+                quantity: 30
+                price: 899.99
+                isAvailable: true
+                storeId: "store-001"
+        description: Array of phone inventory items to add (maximum 100 items)
+      responses:
+        '201':
+          description: Phones added successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                - id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                  type: "iPhone 16"
+                  model: "Apple"
+                  quantity: 50
+                  price: 999.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T09:19:44.527Z"
+                - id: "4fb85f64-5717-4562-b3fc-2c963f66afa7"
+                  type: "Galaxy S24"
+                  model: "Samsung"
+                  quantity: 30
+                  price: 899.99
+                  isAvailable: true
+                  dateAdded: "2025-07-23T10:19:44.527Z"
+        '400':
+          description: Invalid input data or request format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+        '422':
+          description: Validation errors in phone data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+
+  /inventory/{id}/increase:
+    put:
+      summary: Increase quantity by given value
+      operationId: increasePhoneQuantity
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique identifier of the phone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantityUpdateRequest'
+            example:
+              value: 10
+        description: Quantity increase request
+      responses:
+        '200':
+          description: Quantity increased successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                type: "iPhone 16"
+                model: "Apple"
+                quantity: 60
+                price: 999.99
+                isAvailable: true
+                dateAdded: "2025-07-23T09:19:44.527Z"
+        '400':
+          description: Invalid phone ID or quantity value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Phone not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /inventory/decrease:
+    put:
+      summary: Decrease quantity by given value
+      operationId: decreasePhoneQuantity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantityDecreaseRequest'
+            example:
+              id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              value: 5
+        description: Quantity decrease request
+      responses:
+        '200':
+          description: Quantity decreased successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhoneInventoryItem'
+              example:
+                id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+                type: "iPhone 16"
+                model: "Apple"
+                quantity: 45
+                price: 999.99
+                isAvailable: true
+                dateAdded: "2025-07-23T09:19:44.527Z"
+        '400':
+          description: Invalid phone ID, quantity value, or insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Phone not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    PhoneInventoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier (UUID) - generated by system
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        type:
+          type: string
+          minLength: 5
+          maxLength: 15
+          description: Phone type/name (e.g., iPhone 16, Galaxy S24)
+          example: "iPhone 16"
+        model:
+          type: string
+          description: Phone manufacturer
+          example: "Apple"
+          enum:
+            - Apple
+            - Samsung
+            - OnePlus
+            - Xiaomi
+            - Google
+        quantity:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          format: int32
+          description: Stock count (0 or higher)
+          example: 50
+        price:
+          type: number
+          format: double
+          minimum: 0.01
+          maximum: 9999.99
+          description: Unit price in USD
+          example: 999.99
+        isAvailable:
+          type: boolean
+          description: Whether phone is available for sale
+          example: true
+        dateAdded:
+          type: string
+          format: date-time
+          description: Date when added to inventory (ISO 8601 format)
+          example: "2025-07-23T09:19:44.527Z"
+        storeId:
+          type: string
+          description: ID of the store that owns this phone
+          writeOnly: true
+          x-lombok-exclude-toString: true
+      required:
+        - id
+        - type
+        - model
+        - quantity
+        - price
+        - isAvailable
+        - dateAdded
+        - storeId
+
+    PhoneInventoryItemRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          minLength: 5
+          maxLength: 15
+          description: Phone type/name (e.g., iPhone 16, Galaxy S24)
+          example: "iPhone 16"
+        model:
+          type: string
+          description: Phone manufacturer
+          example: "Apple"
+          enum:
+            - Apple
+            - Samsung
+            - OnePlus
+            - Xiaomi
+            - Google
+        quantity:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          format: int32
+          description: Initial stock count
+          example: 50
+        price:
+          type: number
+          format: double
+          minimum: 0.01
+          maximum: 9999.99
+          description: Unit price in USD
+          example: 999.99
+        isAvailable:
+          type: boolean
+          description: Whether phone is available for sale
+          example: true
+        storeId:
+          type: string
+          description: ID of the store that owns this phone
+          writeOnly: true
+          x-lombok-exclude-toString: true
+      required:
+        - type
+        - model
+        - quantity
+        - price
+        - isAvailable
+        - storeId
+
+    QuantityUpdateRequest:
+      type: object
+      properties:
+        value:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Quantity to increase (must be positive)
+          example: 10
+      required:
+        - value
+
+    QuantityDecreaseRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the phone
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        value:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          description: Quantity to decrease (must be positive)
+          example: 5
+      required:
+        - id
+        - value
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Operation completed successfully"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-07-23T09:19:44.527Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          description: Error type
+          example: "PHONE_NOT_FOUND"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "Phone with the specified ID was not found"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-07-23T09:19:44.527Z"
+        path:
+          type: string
+          description: API endpoint that generated the error
+          example: "/inventory/id/123e4567-e89b-12d3-a456-426614174000"
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Validation failed for one or more fields"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-07-23T09:19:44.527Z"
+        path:
+          type: string
+          example: "/inventory"
+        validationErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldError'
+
+    FieldError:
+      type: object
+      properties:
+        field:
+          type: string
+          description: Name of the field that failed validation
+          example: "price"
+        rejectedValue:
+          type: string
+          description: The value that was rejected
+          example: "-10.50"
+        message:
+          type: string
+          description: Validation error message
+          example: "Price must be greater than 0"
+
+    BulkDeleteResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: "Bulk delete operation completed"
+        deletedCount:
+          type: integer
+          description: Number of items successfully deleted
+          example: 3
+        notFoundCount:
+          type: integer
+          description: Number of items that were not found
+          example: 1
+        timestamp:
+          type: string
+          format: date-time
+          example: "2025-07-23T09:19:44.527Z"
