@@ -20,6 +20,6 @@
 
 To Run the Project, Please Follow the Steps Below:
 
-Step 1: Open a terminal in the directory where the store-ui project is located.
-Step 2: Run npm install to install the dependencies, then run npm start to start the frontend. The UI will be available at http://localhost:3000
-Step 3: Open the chainstore project in any IDE and run it. The backend will start at http://localhost:8081
+* Step 1: Open a terminal in the directory where the store-ui project is located.
+* Step 2: Run npm install to install the dependencies, then run npm start to start the frontend. The UI will be available at http://localhost:3000
+* Step 3: Open the chainstore project in any IDE and run it. The backend will start at http://localhost:8081
